@@ -81,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             boolean network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
             if(network_enabled){
                 myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            } else {
+                finish();
             }
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_NETWORK_STATE,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA}, REQUEST_PERMISSIONS);
@@ -117,6 +119,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         }catch (IOException e){
             Log.e("fail found address",e.getMessage());
+            TextView error = findViewById(R.id.error);
+            error.setVisibility(View.VISIBLE);
         }
     }
 
@@ -280,6 +284,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     boolean network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
                     if(network_enabled){
                         myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    } else {
+                        finish();
                     }
                 }
             }

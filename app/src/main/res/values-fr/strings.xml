@@ -5,4 +5,5 @@
     <string name="where">Par ici !</string>
     <string name="info">Ecrire une adresse et appuyer sur le bouton</string>
     <string name="address">Adresse</string>
+    <string name="error">Adresse non trouvée</string>
 </resources>

@@ -4,4 +4,5 @@
     <string name="where">This way !</string>
     <string name="info">Write an address and press button</string>
     <string name="address">Address</string>
+    <string name="error">Address not found</string>
 </resources>

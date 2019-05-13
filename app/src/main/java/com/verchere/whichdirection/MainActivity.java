@@ -81,6 +81,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             boolean network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
             if(network_enabled){
                 myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                if (myLocation == null){
+                    finish();
+                }
             } else {
                 finish();
             }
@@ -284,6 +287,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     boolean network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
                     if(network_enabled){
                         myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        if (myLocation == null){
+                            finish();
+                        }
                     } else {
                         finish();
                     }

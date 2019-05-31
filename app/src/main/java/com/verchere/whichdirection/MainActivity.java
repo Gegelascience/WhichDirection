@@ -82,10 +82,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             boolean network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
             if(network_enabled){
                 myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                if (myLocation == null){
-                    Toast.makeText(MainActivity.this, "Can not find your location", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
             } else {
                 Toast.makeText(MainActivity.this, "Network not enabled", Toast.LENGTH_SHORT).show();
                 finish();
@@ -256,6 +252,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             e.printStackTrace();
         } catch (SecurityException se){
             se.printStackTrace();
+        } catch (NullPointerException npe){
+            npe.printStackTrace();
         }
         Log.e("app", "openCamera X");
     }
@@ -314,10 +312,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     boolean network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
                     if(network_enabled){
                         myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if (myLocation == null){
-                            Toast.makeText(MainActivity.this, "Can not find your location", Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
                     } else {
                         Toast.makeText(MainActivity.this, "Network not enabled", Toast.LENGTH_SHORT).show();
                         finish();

@@ -297,11 +297,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             }
         }
-        // angular.setText(String.valueOf(azimut));
     }
 
     @Override
     public void onAccuracyChanged(Sensor sens, int accuracy){
+        if (sens.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            if (accuracy == 0 | accuracy == 1){
+                Toast.makeText(MainActivity.this, "Please recalibrate your magnetometer", Toast.LENGTH_SHORT).show();
+            }
+        }
+
     }
 
     @Override

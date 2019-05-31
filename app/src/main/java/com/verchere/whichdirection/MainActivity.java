@@ -18,6 +18,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -27,6 +28,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
+import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -50,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     float[] acceleroVector=new float[3];
     float azimut = 0f;
     float orientationCoord = 0f;
-    TextView angular, direction;
+    TextView direction;
     Button search;
     EditText address;
     private TextureView camView;
@@ -72,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         magneto = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         accelero = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        // angular = findViewById(R.id.angular);
         search = findViewById(R.id.search);
         address = findViewById(R.id.address);
         search.setOnClickListener(this);
@@ -82,16 +83,42 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             if(network_enabled){
                 myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 if (myLocation == null){
+                    Toast.makeText(MainActivity.this, "Can not find your location", Toast.LENGTH_SHORT).show();
                     finish();
                 }
             } else {
+                Toast.makeText(MainActivity.this, "Network not enabled", Toast.LENGTH_SHORT).show();
                 finish();
             }
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_NETWORK_STATE,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA}, REQUEST_PERMISSIONS);
         }
+        float LOCATION_REFRESH_DISTANCE = 1;
+        long LOCATION_REFRESH_TIME = 100;
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, LOCATION_REFRESH_TIME,
+                LOCATION_REFRESH_DISTANCE, mLocationListener);
 
     }
+    private final LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(final Location location) {
+            //your code here
+            myLocation = location;
+        }
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+
+        }
+        @Override
+        public void onProviderEnabled(String s) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+
+        }
+    };
 
     @Override
     public void onClick(View v){
@@ -288,12 +315,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     if(network_enabled){
                         myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                         if (myLocation == null){
+                            Toast.makeText(MainActivity.this, "Can not find your location", Toast.LENGTH_SHORT).show();
                             finish();
                         }
                     } else {
+                        Toast.makeText(MainActivity.this, "Network not enabled", Toast.LENGTH_SHORT).show();
                         finish();
                     }
+                } else {
+                    Toast.makeText(MainActivity.this, "Permissions denied", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
+            } else {
+                Toast.makeText(MainActivity.this, "Permissions denied", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }
 
@@ -337,5 +372,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }
 
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (isCamOpened){
+                isCamOpened = false;
+                setContentView(R.layout.activity_main);
+                search = findViewById(R.id.search);
+                address = findViewById(R.id.address);
+                search.setOnClickListener(this);
+            }
+            else {
+                finish();
+            }
+            return true;
+        }
+        return false;
     }
 }

@@ -2,34 +2,21 @@ package com.verchere.whichdirection;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CameraMetadata;
-import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Size;
 import android.view.KeyEvent;
-import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
@@ -38,7 +25,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, ActivityCompat.OnRequestPermissionsResultCallback, View.OnClickListener {
@@ -55,14 +41,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     TextView direction;
     Button search;
     EditText address;
-    private TextureView camView;
-    String cameraId;
-    protected CameraDevice cameraDevice;
-    private Size imageDimension;
-    protected CaptureRequest.Builder captureRequestBuilder;
-    protected CameraCaptureSession cameraCaptureSessions;
-    private Handler mBackgroundHandler;
-    private HandlerThread mBackgroundThread;
+    private CameraView cameraView;
     private boolean isCamOpened = false;
     private boolean isVisible = false;
 
@@ -152,113 +131,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void setARView(){
         setContentView(R.layout.ar_layout);
-        camView = findViewById(R.id.view);
+        cameraView = new CameraView((TextureView) findViewById(R.id.view), this);
         direction = findViewById(R.id.direction);
         isCamOpened = true;
-        assert camView!=null;
-        camView.setSurfaceTextureListener(textureListener);
-
-
     }
-    TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
-        @Override
-        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-            //open your camera here
-            openCamera();
-        }
-        @Override
-        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-            // Transform you image captured size according to the surface width and height
-        }
-        @Override
-        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-            return false;
-        }
-        @Override
-        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        }
-    };
-
-    protected void createCameraPreview() {
-        try {
-            SurfaceTexture texture = camView.getSurfaceTexture();
-            assert texture != null;
-            texture.setDefaultBufferSize(imageDimension.getWidth(), imageDimension.getHeight());
-            Surface surface = new Surface(texture);
-            captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            captureRequestBuilder.addTarget(surface);
-            cameraDevice.createCaptureSession(Arrays.asList(surface), new CameraCaptureSession.StateCallback(){
-                @Override
-                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
-                    //The camera is already closed
-                    if (null == cameraDevice) {
-                        return;
-                    }
-                    // When the session is ready, we start displaying the preview.
-                    cameraCaptureSessions = cameraCaptureSession;
-                    updatePreview();
-                }
-                @Override
-                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
-                    Toast.makeText(MainActivity.this, "Configuration change", Toast.LENGTH_SHORT).show();
-                }
-            }, null);
-
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
-    protected void updatePreview() {
-        if(null == cameraDevice) {
-            Log.e("app", "updatePreview error, return");
-        }
-        captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-        try {
-            cameraCaptureSessions.setRepeatingRequest(captureRequestBuilder.build(), null, mBackgroundHandler);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
-    private final CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
-        @Override
-        public void onOpened(CameraDevice camera) {
-            //This is called when the camera is open
-            Log.e("app", "onOpened");
-            cameraDevice = camera;
-            createCameraPreview();
-        }
-        @Override
-        public void onDisconnected(CameraDevice camera) {
-            cameraDevice.close();
-        }
-        @Override
-        public void onError(CameraDevice camera, int error) {
-            cameraDevice.close();
-            cameraDevice = null;
-        }
-    };
-    private void openCamera() {
-        CameraManager manager = (CameraManager) getSystemService(CAMERA_SERVICE);
-        Log.e("app", "is camera open");
-        try {
-            cameraId = manager.getCameraIdList()[0];
-            CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
-            StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-            assert map != null;
-            imageDimension = map.getOutputSizes(SurfaceTexture.class)[0];
-            // Add permission for camera and let user grant the permission
-            manager.openCamera(cameraId, stateCallback, null);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        } catch (SecurityException se){
-            se.printStackTrace();
-        } catch (NullPointerException npe){
-            npe.printStackTrace();
-        }
-        Log.e("app", "openCamera X");
-    }
-
-
 
     @Override
     public void onSensorChanged(SensorEvent e){
@@ -333,28 +209,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    protected void startBackgroundThread() {
-        mBackgroundThread = new HandlerThread("Camera Background");
-        mBackgroundThread.start();
-        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
-    }
-    protected void stopBackgroundThread() {
-        mBackgroundThread.quitSafely();
-        try {
-            mBackgroundThread.join();
-            mBackgroundThread = null;
-            mBackgroundHandler = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     protected void onPause(){
         super.onPause();
         sensorManager.unregisterListener(this,magneto);
         sensorManager.unregisterListener(this,accelero);
-        stopBackgroundThread();
+        if(isCamOpened){
+            cameraView.stopBackgroundThread();
+        }
+
     }
 
     @Override
@@ -362,13 +226,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onResume();
         sensorManager.registerListener(this,magneto,SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this,accelero,SensorManager.SENSOR_DELAY_NORMAL);
-        startBackgroundThread();
-        if (camView != null){
-            if (camView.isAvailable()) {
-                openCamera();
-            } else {
-                camView.setSurfaceTextureListener(textureListener);
-            }
+        if (isCamOpened){
+            cameraView.startBackgroundThread();
+            cameraView.resumeCam();
         }
 
     }

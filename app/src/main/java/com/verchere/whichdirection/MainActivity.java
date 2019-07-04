@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     float[] acceleroVector=new float[3];
     float azimut = 0f;
     float orientationCoord = 0f;
-    TextView direction;
+    DirectionView direction;
     Button search;
     EditText address;
     private CameraView cameraView;
@@ -59,7 +59,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED ) {
             boolean network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            if(network_enabled){
+            boolean gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            if (gps_enabled){
+                myLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            }
+            else if(network_enabled){
                 myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             } else {
                 Toast.makeText(MainActivity.this, "Network not enabled", Toast.LENGTH_SHORT).show();
@@ -119,6 +123,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     orientationCoord =(float) Math.round(Math.toDegrees(Math.atan2(y,x)));
                     Log.e("angle direction", String.valueOf(orientationCoord));
                     setARView();
+                } else {
+                    TextView error = findViewById(R.id.error);
+                    error.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -132,7 +139,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void setARView(){
         setContentView(R.layout.ar_layout);
         cameraView = new CameraView((TextureView) findViewById(R.id.view), this);
-        direction = findViewById(R.id.direction);
+        TextureView textureView = findViewById(R.id.direction);
+        direction = new DirectionView(this);
+        direction.init(textureView);
         isCamOpened = true;
     }
 
@@ -161,14 +170,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (isCamOpened){
             if (azimut> (orientationCoord-5) && azimut < (orientationCoord +5)){
                 if (!isVisible){
-                    direction.setVisibility(View.VISIBLE);
                     isVisible = true;
+                    direction.setVisibility(true);
+
                 }
 
             } else {
                 if(isVisible){
-                    direction.setVisibility(View.INVISIBLE);
                     isVisible = false;
+                    direction.setVisibility(false);
+
                 }
 
             }
@@ -191,7 +202,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED ) {
                     boolean network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                    if(network_enabled){
+                    boolean gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                    if (gps_enabled){
+                        myLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    }
+                    else if(network_enabled){
                         myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     } else {
                         Toast.makeText(MainActivity.this, "Network not enabled", Toast.LENGTH_SHORT).show();

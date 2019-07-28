@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Which Direction ?</string>
-    <string name="found">Rechercher</string>
-    <string name="where">Par ici !</string>
-    <string name="info">Ecrire une adresse et appuyer sur le bouton</string>
-    <string name="address">Adresse</string>
-    <string name="error">Adresse non trouvée</string>
-</resources>

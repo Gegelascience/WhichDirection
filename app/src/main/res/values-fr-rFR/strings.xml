@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">A vol d\'oiseau</string>
+    <string name="found">Rechercher</string>
+    <string name="where">Par là !</string>
+    <string name="address">adresse</string>
+    <string name="error">Adresse non trouvée</string>
+    <string name="info">Ou voulez-vous allez ?</string>
+</resources>

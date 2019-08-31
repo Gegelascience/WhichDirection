@@ -1,9 +1,8 @@
 <resources>
-    <string name="app_name">A vol d\'oiseau</string>
-    <string name="found">Rechercher</string>
-    <string name="where">Par là !</string>
-    <string name="address">adresse</string>
-    <string name="error">Adresse non trouvée</string>
-    <string name="info">Ou voulez-vous allez ?</string>
-    <string name="start">Où êtes vous ?</string>
+    <string name="app_name">Which Direction ?</string>
+    <string name="found">Search</string>
+    <string name="where">This way !</string>
+    <string name="address">Address</string>
+    <string name="error">Address not found</string>
+    <string name="info">Write an address and press button</string>
 </resources>
